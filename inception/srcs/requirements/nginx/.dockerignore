@@ -1,0 +1,4 @@
+.git
+.env
+tools/private.key
+tools/selfsigned.cr
