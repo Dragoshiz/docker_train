@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 
 services:
   nginx:
@@ -35,6 +35,8 @@ services:
       - 3306:3306
     networks:
       - inception
+    env_file:
+      - .env
     restart: always
 
   wordpress:

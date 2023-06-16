@@ -1,6 +1,6 @@
 all:
 	./srcs/requirements/wordpress/tools/make_dir.sh 
-	@docker-compose --env-file srcs/.env -f srcs/docker-compose.yml up -d --build
+	@docker-compose --env-file srcs/.env -f srcs/docker-compose.yml up --build
 
 down:
 	@docker-compose --env-file srcs/.env -f srcs/docker-compose.yml down
