@@ -1,24 +1,60 @@
 #!/bin/bash
-MYSQL_DATABASE=$1
-MYSQL_USER=$2
-MYSQL_PASSWORD=$3
+mkdir /var/www/
+mkdir /var/www/html
 
-if [ ! -f "/var/www/wp-config.php" ]; then
- 	mkdir -p /var/www
-	echo "THESE ARE THE ENV VARS  ${MYSQL_DATABASE} and ${MYSQL_USER}"
-	cat << EOF > /var/www/wp-config.php
-<?php
-define( 'DB_NAME', '$MYSQL_DATABASE' );
-define( 'DB_USER', '$MYSQL_USER' );
-define( 'DB_PASSWORD', '$MYSQL_PASSWORD' );
-define( 'DB_HOST', 'mariadb' );
-define( 'DB_CHARSET', 'utf8' );
-define( 'DB_COLLATE', '' );
-define( 'FS_METHOD', 'direct' );
-\$table_prefix = 'wp_';
-define( 'WP_DEBUG', false );
-if ( ! defined( 'ABSPATH' ) ) {
-define( 'ABSPATH', __DIR__ . '/' );}
-require_once ABSPATH . 'wp-settings.php';
-EOF
-fi
+cd /var/www/html
+
+
+rm -rf *
+
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar 
+
+chmod +x wp-cli.phar 
+
+mv wp-cli.phar /usr/local/bin/wp
+
+
+wp core download --allow-root
+
+mv wp-config-sample.php wp-config.php
+
+# mv /wp-config.php /var/www/html/wp-config.php
+
+sed -i -r "s/database_name_here/$MYSQL_DATABASE/1"   wp-config.php
+sed -i -r "s/username_here/$MYSQL_USER/1"   wp-config.php
+sed -i -r "s/password_here/$MYSQL_PASSWORD/1"     wp-config.php
+sed -i -r "s/localhost/mariadb/1"     wp-config.php
+
+
+wp core install --url=$DOMAIN_NAME/ --title=$WP_TITLE --admin_user=$MYSQL_USER --admin_password=$MYSQL_PASSWORD --admin_email=$WP_EMAIL --skip-email --allow-root
+
+
+
+
+wp user create $WP_USER $WP_USER_EMAIL --role=author --user_pass=$WP_PASSWD --allow-root
+
+
+wp theme install astra --activate --allow-root
+
+
+wp plugin install redis-cache --activate --allow-root
+
+wp plugin update --all --allow-root
+
+
+ 
+sed -i "s|listen = /run/php/php7.3-fpm.sock|listen = 9000|g" \
+		/etc/php/7.3/fpm/pool.d/www.conf && \
+sed -i "s|listen.owner = www-data|listen.owner = nobody|g" \
+		/etc/php/7.3/fpm/pool.d/www.conf && \
+sed -i "s|listen.group = www-data|listen.group = nobody|g" \
+		/etc/php/7.3/fpm/pool.d/www.conf && \
+rm -rf /var/cache/apt/*
+
+mkdir /run/php
+
+
+
+wp redis enable --allow-root
+
+/usr/sbin/php-fpm7.3 -F
