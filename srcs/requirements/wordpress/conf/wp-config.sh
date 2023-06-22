@@ -1,6 +1,12 @@
 #!/bin/bash
-mkdir /var/www/
-mkdir /var/www/html
+
+if [ ! -d "/var/www/" ]; then
+	mkdir /var/www/
+fi
+
+if [ ! -d "/var/www/html" ]; then
+	mkdir /var/www/html
+fi
 
 cd /var/www/html
 
@@ -18,12 +24,11 @@ wp core download --allow-root
 
 mv wp-config-sample.php wp-config.php
 
-# mv /wp-config.php /var/www/html/wp-config.php
 
 sed -i -r "s/database_name_here/$MYSQL_DATABASE/1"   wp-config.php
 sed -i -r "s/username_here/$MYSQL_USER/1"   wp-config.php
 sed -i -r "s/password_here/$MYSQL_PASSWORD/1"     wp-config.php
-sed -i -r "s/localhost/mariadb/1"     wp-config.php
+sed -i -r "s/localhost/$HOSTNAME/1"     wp-config.php
 
 
 wp core install --url=$DOMAIN_NAME/ --title=$WP_TITLE --admin_user=$MYSQL_USER --admin_password=$MYSQL_PASSWORD --admin_email=$WP_EMAIL --skip-email --allow-root
@@ -51,10 +56,8 @@ sed -i "s|listen.group = www-data|listen.group = nobody|g" \
 		/etc/php/7.3/fpm/pool.d/www.conf && \
 rm -rf /var/cache/apt/*
 
-mkdir /run/php
-
-
-
-wp redis enable --allow-root
+if [ ! -d "/run/php" ]; then
+	mkdir /run/php
+fi
 
 /usr/sbin/php-fpm7.3 -F

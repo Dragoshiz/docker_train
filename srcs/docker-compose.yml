@@ -1,10 +1,11 @@
-version: '3.3'
+version: '3'
 
 services:
   nginx:
     build:
       context: .
       dockerfile: requirements/nginx/Dockerfile
+    image: nginx:${VERSION}
     container_name: nginx
     depends_on:
       - wordpress
@@ -23,32 +24,24 @@ services:
     container_name: mariadb
     build:
       context: .
-      args:
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        MYSQL_HOSTNAME: ${MYSQL_HOSTNAME}
       dockerfile: requirements/mariadb/Dockerfile
+    image: mariadb:${VERSION}
     volumes:
       - db-volume:/var/lib/mysql
     ports:
       - 3306:3306
     networks:
       - inception
+    restart: always
     env_file:
       - .env
-    restart: always
 
   wordpress:
     container_name: wordpress
     build:
       context: .
-      # args:
-      #   MYSQL_DATABASE: ${MYSQL_DATABASE}
-      #   MYSQL_USER: ${MYSQL_USER}
-      #   MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      #   MYSQL_HOSTNAME: ${MYSQL_HOSTNAME}
       dockerfile: requirements/wordpress/Dockerfile
+    image: wordpress:${VERSION}
     depends_on:
       - mariadb
     restart: always
@@ -75,3 +68,4 @@ volumes:
 networks:
     inception:
         driver: bridge
+  
