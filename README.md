@@ -1,2 +1,2 @@
 # docker_train
-Little project on using docker and to link multiple services together.
+Little project on learning how to use docker containers and how to link multiple services together.
